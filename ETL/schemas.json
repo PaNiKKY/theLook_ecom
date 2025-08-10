@@ -1,0 +1,62 @@
+{
+  "orders": [
+    {"name": "order_id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "user_id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "status", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "gender", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "created_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "returned_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "shipped_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "delivered_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "num_of_item", "mode": "NULLABLE", "type": "INTEGER"}
+  ],
+  "order_items": [
+    {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "order_id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "user_id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "product_id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "inventory_item_id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "status", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "created_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "shipped_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "delivered_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "returned_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "sale_price", "mode": "NULLABLE", "type": "FLOAT"}
+  ],
+  "products": [
+    {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "cost", "mode": "NULLABLE", "type": "FLOAT"},
+    {"name": "category", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "name", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "brand", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "retail_price", "mode": "NULLABLE", "type": "FLOAT"},
+    {"name": "department", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "sku", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "distribution_center_id", "mode": "NULLABLE", "type": "INTEGER"}
+  ],
+  "users": [
+    {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "first_name", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "last_name", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "email", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "age", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "gender", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "state", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "street_address", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "postal_code", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "city", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "country", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "latitude", "mode": "NULLABLE", "type": "FLOAT"},
+    {"name": "longitude", "mode": "NULLABLE", "type": "FLOAT"},
+    {"name": "traffic_source", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "created_at", "mode": "NULLABLE", "type": "TIMESTAMP"},
+    {"name": "user_geom", "mode": "NULLABLE", "type": "STRING"}
+  ],
+  "distribution_centers": [
+    {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+    {"name": "name", "mode": "NULLABLE", "type": "STRING"},
+    {"name": "latitude", "mode": "NULLABLE", "type": "FLOAT"},
+    {"name": "longitude", "mode": "NULLABLE", "type": "FLOAT"},
+    {"name": "distribution_center_geom", "mode": "NULLABLE", "type": "STRING"}
+  ]
+}
