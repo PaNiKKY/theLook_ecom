@@ -1,0 +1,22 @@
+ {
+    "expectation_suite_name": "raw_orders_expectation_suite",
+    "expectations": [
+      {
+        "expectation_type": "expect_table_columns_to_match_set",
+        "kwargs": {
+          "column_set": [
+            "order_id",
+            "user_id",
+            "status",
+            "gender",
+            "created_at",
+            "returned_at",
+            "shipped_at",
+            "delivered_at",
+            "num_of_item"
+          ],
+          "exact_match": true
+        }
+      }
+    ]
+  }

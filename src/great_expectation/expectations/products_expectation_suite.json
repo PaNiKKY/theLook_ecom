@@ -1,0 +1,22 @@
+{
+    "expectation_suite_name": "raw_products_expectation_suite",
+    "expectations": [
+      {
+        "expectation_type": "expect_table_columns_to_match_set",
+        "kwargs": {
+          "column_set": [
+            "id",
+            "cost",
+            "category",
+            "name",
+            "brand",
+            "retail_price",
+            "department",
+            "sku",
+            "distribution_center_id"
+          ],
+          "exact_match": true
+        }
+      }
+    ]
+}

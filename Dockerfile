@@ -22,4 +22,4 @@ USER airflow
 # RUN pip install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN pip3 install --no-cache-dir --use-deprecated=legacy-resolver apache-airflow-providers-google
+# RUN pip3 install --no-cache-dir --use-deprecated=legacy-resolver apache-airflow-providers-google

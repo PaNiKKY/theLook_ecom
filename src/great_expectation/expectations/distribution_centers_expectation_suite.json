@@ -1,0 +1,18 @@
+{
+  "expectation_suite_name": "raw_distribution_centers_expectation_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_set",
+      "kwargs": {
+        "column_set": [
+          "id",
+          "name",
+          "latitude",
+          "longitude",
+          "distribution_center_geom"
+        ],
+        "exact_match": true
+        }
+      }
+    ]
+  }

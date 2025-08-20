@@ -1,0 +1,38 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "dim_distributions_expectation_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "distribution_center_key"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {"column": "distribution_center_key"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "distribution_center_id", "type_": "int32"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "name", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "latitude", "type_": "float32"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "longitude", "type_": "float32"}
+    },
+        {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "latitude", "min_value": -90, "max_value": 90}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "longitude", "min_value": -180, "max_value": 180}
+    }
+  ]
+}

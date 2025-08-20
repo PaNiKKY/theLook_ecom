@@ -7,5 +7,7 @@ apache-airflow==2.10.5
 apache-airflow-providers-fab
 apache-airflow-providers-celery
 psycopg2-binary
-great_expectations==1.5.6
+great_expectations==0.18.22
 sqlalchemy-bigquery
+apache-airflow-providers-google
+pyarrow

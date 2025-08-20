@@ -9,23 +9,34 @@ from airflow.providers.google.cloud.operators.dataproc import (
     DataprocSubmitJobOperator
 )
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 import asyncio
 import json
 import os
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 import os
 import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ETL.extract.gcp_connectors import upload_df_to_gcs
+from ETL.extract.gcp_connectors import load_df_from_gcs_to_bq, read_parquet_from_gcs, upload_df_to_gcs
 from ETL.extract.extraction import get_df_from_bq, validate_df_columns
+from src.great_expectation.gx import run_great_expectations
 load_dotenv()
 
-with open("ETL/schemas.json", "r") as f:
-    schemas_dict = json.load(f)
+with open("src/schemas/bronze_schemas.json", "r") as f:
+    bronze_schemas_dict = json.load(f)
+
+with open("src/schemas/silver_schemas.json", "r") as f:
+    silver_schemas_dict = json.load(f)
+
+with open("src/schemas/gold_schemas.json", "r") as f:
+    gold_schemas_dict = json.load(f)
+
+with open("ETL/load/upsert.sql", "r") as f:
+    upsert_query = f.read()
 
 
 project_id = os.getenv("project_id")
@@ -33,12 +44,17 @@ key_path = os.getenv("key_path")
 bucket_suffix = os.getenv("bucket_suffix")
 region = os.getenv("region")
 clean_spark_file = os.getenv("clean_spark_file")
+model_spark_file = os.getenv("model_spark_file")
+utils_spark_file = os.getenv("utils_spark_file")
+utils_spark_path = f"gs://{project_id}-{bucket_suffix}-scripts{utils_spark_file}"
+model_spark_path = f"gs://{project_id}-{bucket_suffix}-scripts{model_spark_file}"
 clean_spark_path = f"gs://{project_id}-{bucket_suffix}-scripts{clean_spark_file}"
 
 bucket_name = f"{project_id}-{bucket_suffix}"
 cluster_name = f"{project_id}-cluster"
 
 bucket_name = f"{project_id}-{bucket_suffix}"
+bq_dataset = os.getenv("bq_dataset")
 
 @dag(
     schedule_interval='@daily',
@@ -72,18 +88,44 @@ def ecom_pipeline_dag():
                             "args": [
                                         "--date_input", date,
                                         "--bucket_name", bucket_name,
-                                        "--schema", json.dumps(schemas_dict)
-                                    ]
+                                        "--schema", json.dumps(bronze_schemas_dict)
+                                    ],
+                            "python_file_uris": [
+                                    utils_spark_path
+                                ]
                             },
             }
 
-    create_bucket_task = GCSCreateBucketOperator(
-        task_id='create_bucket_if_not_exists',
-        bucket_name=bucket_name,
-        project_id=project_id,
-        location=region.split("-")[0].upper(),
-        gcp_conn_id="gcp_conn"
-        )
+    MODEL_JOB = {
+            "reference": {"project_id": project_id},
+            "placement": {"cluster_name": cluster_name},
+            "pyspark_job": {"main_python_file_uri": model_spark_path,
+                            "args": [
+                                        "--date_input", date,
+                                        "--bucket_name", bucket_name,
+                                        "--schema", json.dumps(silver_schemas_dict)
+                                    ],
+                            "python_file_uris": [
+                                    utils_spark_path
+                                ]
+                            },
+            }
+        
+    
+    @task_group(group_id="quality_check")
+    def check_columns_quality():
+        table_list = bronze_schemas_dict.keys()
+        for table in table_list:
+            @task(task_id=f"validate_columns_{table}_bq")
+            def validate_bq_query(table):
+                df = get_df_from_bq(
+                    table_name=table,
+                    filter=f"LIMIT 5"
+                    )
+                run_great_expectations(df, table)
+            
+            validate_bq_query(table)
+
     @task_group(group_id="extract")
     def extract_ecom_table_from_bq_to_gcs(): 
         @task
@@ -94,13 +136,8 @@ def ecom_pipeline_dag():
                 )
             
             print(df.head(3))
-            is_pass = validate_df_columns(df, schemas_dict["orders"])
-            if is_pass:
-                upload_df_to_gcs(df, "orders.csv", date)
-                return df["order_id"].tolist()
-            else:
-                raise ValueError("Validation failed for orders table has columns that do not match the expected schema.")
-
+            upload_df_to_gcs(df, "orders.csv", date)
+            return df["order_id"].tolist()
         @task
         def extract_order_items_table_validation(order_ids,date):
             df = get_df_from_bq(
@@ -108,11 +145,8 @@ def ecom_pipeline_dag():
                 filter=f"WHERE order_id IN {tuple(order_ids)}"
                 )
             print(df.head(3))
-            is_pass = validate_df_columns(df, schemas_dict["order_items"])
-            if is_pass:
-                upload_df_to_gcs(df, "order_items.csv", date)
-            else:
-                raise ValueError("Validation failed for order_items table has columns that do not match the expected schema.")
+            upload_df_to_gcs(df, "order_items.csv", date)
+
 
         @task
         def extract_product_table_validation(date):
@@ -120,11 +154,7 @@ def ecom_pipeline_dag():
                 table_name="products"
                 )
             print(df.head(3))
-            is_pass = validate_df_columns(df, schemas_dict["products"])
-            if is_pass:
-                upload_df_to_gcs(df, "products.csv", date)
-            else:
-                raise ValueError("Validation failed for products table has columns that do not match the expected schema.")
+            upload_df_to_gcs(df, "products.csv", date)
 
         @task
         def extract_user_table_validation(date):
@@ -132,11 +162,7 @@ def ecom_pipeline_dag():
                 table_name="users"
                 )
             print(df.head(3))
-            is_pass = validate_df_columns(df, schemas_dict["users"])
-            if is_pass:
-                upload_df_to_gcs(df, "users.csv", date)
-            else:
-                raise ValueError("Validation failed for users table has columns that do not match the expected schema.")
+            upload_df_to_gcs(df, "users.csv", date)
 
         @task
         def extract_distribution_table_validation(date):
@@ -144,18 +170,14 @@ def ecom_pipeline_dag():
                 table_name="distribution_centers"
                 )
             print(df.head(3))
-            is_pass = validate_df_columns(df, schemas_dict["distribution_centers"])
-            if is_pass:
-                upload_df_to_gcs(df, "distribution_centers.csv", date)
-            else:
-                raise ValueError("Validation failed for distribution_centers table has columns that do not match the expected schema.")
+            upload_df_to_gcs(df, "distribution_centers.csv", date)
+
 
         extract_order_items_table_validation(extract_order_table_validation(date), date)
         extract_product_table_validation(date)
         extract_user_table_validation(date)
         extract_distribution_table_validation(date)
 
-    
     create_cluster = DataprocCreateClusterOperator(
         task_id="create_dataproc_cluster",
         project_id=project_id,
@@ -165,13 +187,26 @@ def ecom_pipeline_dag():
         gcp_conn_id="gcp_conn"
     )
 
-    transform_job_task = DataprocSubmitJobOperator(
-        task_id="transform_job_task", 
-        job=CLEAN_JOB,
-        region=region, 
-        project_id=project_id,
-        gcp_conn_id="gcp_conn"
-    )
+
+    @task_group(group_id="transform")
+    def transform_ecom():
+        cleaning_job_task = DataprocSubmitJobOperator(
+            task_id="transform_job_task", 
+            job=CLEAN_JOB,
+            region=region, 
+            project_id=project_id,
+            gcp_conn_id="gcp_conn"
+        )
+
+        modeling_job_task = DataprocSubmitJobOperator(
+            task_id="modeling_job_task", 
+            job=MODEL_JOB,
+            region=region, 
+            project_id=project_id,
+            gcp_conn_id="gcp_conn"
+        )
+
+        cleaning_job_task >> modeling_job_task
 
     delete_cluster = DataprocDeleteClusterOperator(
         task_id="delete_cluster",
@@ -182,7 +217,68 @@ def ecom_pipeline_dag():
         gcp_conn_id="gcp_conn"
     )
 
-    create_bucket_task >> [extract_ecom_table_from_bq_to_gcs(), create_cluster] >> transform_job_task >> delete_cluster
+    @task_group(group_id="check_quality_before_load")
+    def check_quality_before_load():
+        dw_table_list = gold_schemas_dict.keys()
+        
+        for table in dw_table_list:
+            @task(task_id=f"validate_before_load_{table}")
+            def validate_before_load(table, date):
+                dataframe_to_validate=read_parquet_from_gcs(
+                        table_name=table,
+                        bucket_name=bucket_name,
+                        date = date
+                        )
+                run_great_expectations(dataframe_to_validate, table)
 
+            validate_before_load(table, date)
+    
+    @task_group(group_id="load_to_parquet_bq")
+    def load_parquet_to_bq():
+        for table in gold_schemas_dict.keys():
+            @task(task_id=f"load_{table}_to_bq")
+            def load_to_bq(table, date):
+                load_df_from_gcs_to_bq(
+                        table_name=table,
+                        bq_dataset=bq_dataset,
+                        schema=gold_schemas_dict[table],
+                        bucket_name=bucket_name,
+                        date = date
+                    )
+            load_to_bq(table, date)
+    
+    upsert_to_dw_tables = BigQueryInsertJobOperator(
+        task_id='upsert_to_dw_tables',
+        configuration={
+                "query": {
+                    "query":upsert_query.format(
+                        project_id=project_id,
+                        bigquery_dataset=bq_dataset
+                    ),
+                    "useLegacySql": False,
+                }
+            },
+        gcp_conn_id="gcp_conn"
+        )
+    
+    @task_group(group_id="delete_staging_tables")
+    def delete_staging_tables():
+        for table in gold_schemas_dict.keys():
+            delete_staging_table = BigQueryInsertJobOperator(
+                task_id=f'delete_staging_{table}',
+                configuration={
+                        "query": {
+                            "query":
+                                f"""
+                                    DROP TABLE IF EXISTS `{project_id}.{bq_dataset}.staging_{table}`;
+                                """,
+                            "useLegacySql": False,
+                        }
+                    },
+                gcp_conn_id="gcp_conn"
+                )
+            delete_staging_table
+
+    [check_columns_quality() >> extract_ecom_table_from_bq_to_gcs(), create_cluster] >> transform_ecom() >> check_quality_before_load() >> load_parquet_to_bq() >> upsert_to_dw_tables >> delete_staging_tables() >> delete_cluster
 
 ecom_pipeline_dag()

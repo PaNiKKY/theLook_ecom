@@ -1,0 +1,78 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "dim_users_expectation_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "user_key"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {"column": "user_key"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "user_id", "type_": "int32"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "username", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "email", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_match_regex",
+      "kwargs": {"column": "email", "regex": "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "age", "type_": "int32"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {"column": "gender", "value_set": ["M", "F"]}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "state", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "street_address", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "postal_code", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "city", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "country", "type_": "object"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "latitude", "type_": "float32"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "latitude", "min_value": -90, "max_value": 90}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {"column": "longitude", "min_value": -180, "max_value": 180}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "longitude", "type_": "float32"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "traffic_source", "type_": "object"}
+    }
+  ]
+}
