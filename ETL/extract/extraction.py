@@ -20,15 +20,4 @@ def get_df_from_bq(table_name, filter="" ) -> pd.DataFrame:
     df = extract_from_bq(query)
     return df
 
-def validate_df_columns(df: pd.DataFrame, expected_columns: list) -> bool:
-
-    expected_columns = [col["name"] for col in expected_columns]
-    df_columns = df.columns.tolist()
-    try:
-        assert sorted(df_columns) == sorted(expected_columns), "DataFrame columns do not match expected columns."
-        return True
-    except AssertionError as e:
-        print(f"Validation Error: {e}")
-        return False
-
 

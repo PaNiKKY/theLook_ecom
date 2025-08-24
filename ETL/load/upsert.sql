@@ -2,31 +2,13 @@ BEGIN TRANSACTION;
 
 -- Upsert into fact_order_items
 MERGE INTO `{project_id}.{bigquery_dataset}.fact_order_items` t
-USING (
-  SELECT
-    COALESCE(s.order_id, f.order_id) AS order_id,
-    COALESCE(s.product_key, f.product_key) AS product_key,
-    COALESCE(s.user_key, f.user_key) AS user_key,
-    COALESCE(s.distribution_center_key, f.distribution_center_key) AS distribution_center_key,
-    COALESCE(s.status, f.status) AS status,
-    COALESCE(s.created_at, f.created_at) AS created_at,
-    COALESCE(s.shipped_at, f.shipped_at) AS shipped_at,
-    COALESCE(s.delivered_at, f.delivered_at) AS delivered_at,
-    COALESCE(s.returned_at, f.returned_at) AS returned_at,
-    COALESCE(s.cost, f.cost) AS cost,
-    COALESCE(s.item_quantity, f.item_quantity) AS item_quantity,
-    COALESCE(s.sale_price, f.sale_price) AS sale_price,
-    COALESCE(s.total_cost, f.total_cost) AS total_cost,
-    COALESCE(s.total_sale_price, f.total_sale_price) AS total_sale_price,
-    COALESCE(s.profit, f.profit) AS profit
-  FROM `{project_id}.{bigquery_dataset}.fact_order_items` f
-  FULL JOIN `{project_id}.{bigquery_dataset}.staging_fact_order_items` s
-  ON f.order_id = s.order_id AND f.product_key = s.product_key
-) u
-ON t.order_id = u.order_id AND t.product_key = u.product_key
+USING `{project_id}.{bigquery_dataset}.staging_fact_order_items` u
+ON t.order_id = u.order_id AND t.product_key = u.product_key 
+AND t.created_at_partition {partition_date} AND u.created_at_partition {partition_date}
 WHEN MATCHED THEN
 UPDATE SET
   t.status = u.status,
+  t.created_at_partition = u.created_at_partition,
   t.created_at = u.created_at,
   t.shipped_at = u.shipped_at,
   t.delivered_at = u.delivered_at,
@@ -44,6 +26,7 @@ WHEN NOT MATCHED THEN
     user_key,
     distribution_center_key,
     status,
+    created_at_partition,
     created_at,
     shipped_at,
     delivered_at,
@@ -61,6 +44,7 @@ WHEN NOT MATCHED THEN
     u.user_key,
     u.distribution_center_key,
     u.status,
+    u.created_at_partition,
     u.created_at,
     u.shipped_at,
     u.delivered_at,

@@ -1,51 +1,69 @@
+[
   {
-    "fact_order_items": [
-      {"name": "order_id", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "product_key", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "user_key", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "distribution_center_key", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "status", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "created_at", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "shipped_at", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "delivered_at", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "returned_at", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "cost", "mode": "NULLABLE", "type": "FLOAT"},
-      {"name": "item_quantity", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "sale_price", "mode": "NULLABLE", "type": "FLOAT"},
-      {"name": "total_cost", "mode": "NULLABLE", "type": "FLOAT"},
-      {"name": "total_sale_price", "mode": "NULLABLE", "type": "FLOAT"},
-      {"name": "profit", "mode": "NULLABLE", "type": "FLOAT"}
+    "table_name": "fact_order_items",
+    "schema": [
+      { "name": "order_id", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "product_key", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "user_key", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "distribution_center_key", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "status", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "created_at", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "shipped_at", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "delivered_at", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "returned_at", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "cost", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "item_quantity", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "sale_price", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "total_cost", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "total_sale_price", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "profit", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "created_at_partition", "type": "DATE", "mode": "NULLABLE" }
     ],
-    "dim_products": [
-      {"name": "product_key", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "product_id", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "category", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "name", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "brand", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "department", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "sku", "mode": "NULLABLE", "type": "STRING"}
-    ],
-    "dim_users": [
-      {"name": "user_key", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "user_id", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "username", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "email", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "age", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "gender", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "state", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "street_address", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "postal_code", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "city", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "country", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "latitude", "mode": "NULLABLE", "type": "FLOAT"},
-      {"name": "longitude", "mode": "NULLABLE", "type": "FLOAT"},
-      {"name": "traffic_source", "mode": "NULLABLE", "type": "STRING"}
-    ],
-    "dim_distributions": [
-      {"name": "distribution_center_key", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "distribution_center_id", "mode": "NULLABLE", "type": "INTEGER"},
-      {"name": "name", "mode": "NULLABLE", "type": "STRING"},
-      {"name": "latitude", "mode": "NULLABLE", "type": "FLOAT"},
-      {"name": "longitude", "mode": "NULLABLE", "type": "FLOAT"}
+    "partitioning": {
+      "type": "DAY",
+      "field": "created_at_partition",
+      "require_filter": true
+    }
+  },
+  {
+    "table_name": "dim_products",
+    "schema": [
+      { "name": "product_key", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "product_id", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "category", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "name", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "brand", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "department", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "sku", "type": "STRING", "mode": "NULLABLE" }
+    ]
+  },
+  {
+    "table_name": "dim_users",
+    "schema": [
+      { "name": "user_key", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "user_id", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "username", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "email", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "age", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "gender", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "state", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "street_address", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "postal_code", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "city", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "country", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "latitude", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "longitude", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "traffic_source", "type": "STRING", "mode": "NULLABLE" }
+    ]
+  },
+  {
+    "table_name": "dim_distributions",
+    "schema": [
+      { "name": "distribution_center_key", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "distribution_center_id", "type": "INTEGER", "mode": "NULLABLE" },
+      { "name": "name", "type": "STRING", "mode": "NULLABLE" },
+      { "name": "latitude", "type": "FLOAT", "mode": "NULLABLE" },
+      { "name": "longitude", "type": "FLOAT", "mode": "NULLABLE" }
     ]
   }
+]

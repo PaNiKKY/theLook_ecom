@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, FloatType
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, FloatType, DateType
 from pyspark.sql.functions import col, to_timestamp, lit, concat_ws, expr, md5, date_format
 
 import argparse
@@ -92,6 +92,7 @@ order_items_df = order_items_df.join(products_df.select("product_id", "product_k
                                 .join(users_df.select("user_id", "user_key"), "user_id", "left") \
                                 .join(distribution_centers_df.select("distribution_center_id", "distribution_center_key"), "distribution_center_id", "left") \
                                 .drop("product_id", "user_id", "distribution_center_id") \
+                                .withColumn("created_at_partition", col("created_at").cast(DateType())) \
                                 .withColumn("created_at", date_format(col("created_at"), "yyyyMMdd").cast(IntegerType())) \
                                 .withColumn("shipped_at", date_format(col("shipped_at"), "yyyyMMdd").cast(IntegerType())) \
                                 .withColumn("delivered_at", date_format(col("delivered_at"), "yyyyMMdd").cast(IntegerType())) \
